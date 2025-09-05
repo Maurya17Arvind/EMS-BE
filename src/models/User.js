@@ -1,5 +1,5 @@
 // src/models/User.js
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
   firstName: {
@@ -23,8 +23,27 @@ const UserSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
-   resetPasswordToken: String,
+  resetPasswordToken: String,
   resetPasswordExpires: Date,
+  phone: { type: String },
+  location: { type: String },
+  bio: { type: String },
+  registeredEvents: [
+    {
+      event: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'event',
+      },
+    },
+  ],
+  organizedEvents: [
+    {
+      event: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'event',
+      },
+    },
+  ],
 });
 
-module.exports = mongoose.model('user', UserSchema);
+module.exports = mongoose.model("user", UserSchema);

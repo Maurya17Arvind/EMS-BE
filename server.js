@@ -13,9 +13,10 @@ app.use(cors()); // This will allow all origins. For production, you should conf
 connectDB();
 
 // Init Middleware
-app.use(bodyParser.json());
+app.use(express.json());
 app.use('/api/auth', require('./src/routes/auth'));
-
+app.use('/api/profile', require('./src/routes/profile')); // Add this line
+app.use('/api/events', require('./src/routes/events')); // Add this line
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Event Management System API');
