@@ -38,7 +38,7 @@ exports.signup = async (req, res) => {
 
     jwt.sign(
       payload,
-      'your_jwt_secret', // You should use a secret from an environment variable
+      'f120094cc7e65863c2339864e0939c2cc4c0a90788cdac9113203ba201ca2cf6', // You should use a secret from an environment variable
       { expiresIn: 3600 }, // Token expires in 1 hour
       (err, token) => {
         if (err) throw err;
@@ -76,7 +76,7 @@ exports.login = async (req, res) => {
 
     jwt.sign(
       payload,
-      'your_jwt_secret', // You should use a secret from an environment variable
+      'f120094cc7e65863c2339864e0939c2cc4c0a90788cdac9113203ba201ca2cf6', // You should use a secret from an environment variable
       { expiresIn: 3600 },
       (err, token) => {
         if (err) throw err;
