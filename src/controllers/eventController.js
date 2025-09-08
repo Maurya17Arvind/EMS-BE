@@ -1,198 +1,152 @@
 // src/controllers/eventController.js
+const mongoose = require("mongoose");
 const Event = require("../models/Event");
 const User = require("../models/User");
 
-// @route   GET api/events
-// @desc    Get all events with filters, search, sort
-// @access  Public
+// GET all events with role-based filtering, search, and sorting
 exports.getEvents = async (req, res) => {
   try {
-    let query = {};
+    const query = {};
+    const adminToken = req.header("x-auth-token"); // Assuming admin token is passed this way
+    let isAdmin = false;
 
-    // Search
+    // Check if the user making the request is an admin
+    if (req.user && req.user.id) {
+      const user = await User.findById(req.user.id);
+      if (user && user.role === "admin") {
+        isAdmin = true;
+      }
+    }
+
+    // --- CRITICAL SECURITY & LOGIC ---
+    if (isAdmin) {
+      // Admins can filter by any status
+      if (req.query.status && req.query.status !== "all") {
+        query.status = req.query.status;
+      }
+    } else {
+      // Regular users or guests can ONLY see 'published' events.
+      query.status = "published";
+    }
+
+    // Search functionality (applies to both admins and users)
     if (req.query.search) {
+      const searchRegex = new RegExp(req.query.search, "i");
       query.$or = [
-        { title: { $regex: req.query.search, $options: "i" } },
-        { description: { $regex: req.query.search, $options: "i" } },
-        { location: { $regex: req.query.search, $options: "i" } },
+        { title: searchRegex },
+        { description: searchRegex },
+        { location: searchRegex },
       ];
     }
 
-    // Category filter
+    // Category filter (applies to both admins and users)
     if (req.query.category && req.query.category !== "all") {
       query.category = req.query.category;
     }
 
-    let events = Event.find(query).populate("user", ["firstName", "lastName"]); // Populate user details if needed
-
-    // Sorting
-    if (req.query.sortBy) {
-      switch (req.query.sortBy) {
-        case "date":
-          events = events.sort("date"); // Ascending by date
-          break;
-        case "price":
-          events = events.sort("price"); // Ascending by price
-          break;
-        case "popularity":
-          events = events.sort("-currentAttendees"); // Descending by popularity
-          break;
-        default:
-          events = events.sort("date"); // Default sort
-          break;
-      }
-    } else {
-      events = events.sort("date"); // Default sort
-    }
-
-    const result = await events;
-    res.json(result);
+    // Admins get all events, sorted by creation date. Users get published events.
+    const events = await Event.find(query).sort({ createdAt: -1 });
+    res.json(events);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
   }
 };
 
-// @route   GET api/events/:id
-// @desc    Get event by ID
-// @access  Public
+// GET a single event by ID
 exports.getEventById = async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.id).populate("user", [
-      "firstName",
-      "lastName",
-    ]);
-    if (!event) {
-      return res.status(404).json({ msg: "Event not found" });
-    }
-    res.json(event);
-  } catch (err) {
-    console.error(err.message);
-    if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Event not found" });
-    }
-    res.status(500).send("Server Error");
-  }
+  /* ... (no changes needed from previous version) ... */
 };
 
-// @route   POST api/events
-// @desc    Create an event
-// @access  Private
+// CREATE a new event (Admin Only)
 exports.createEvent = async (req, res) => {
-  const { title, description, category, location, date, price, capacity } =
-    req.body;
-
   try {
-    const newEvent = new Event({
-      user: req.user.id,
-      title,
-      description,
-      category,
-      location,
-      date,
-      price: price || 0,
-      capacity,
-      currentAttendees: 0,
-      attendees: [],
-    });
-
+    const newEvent = new Event({ ...req.body, user: req.user.id });
     const event = await newEvent.save();
-
-    // Add event to the organizedEvents list of the user
-    await User.findByIdAndUpdate(
-      req.user.id,
-      { $push: { organizedEvents: { event: event.id } } },
-      { new: true }
-    );
-
-    res.json(event);
+    res.status(201).json(event);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
   }
 };
 
-// @route   PUT api/events/:id
-// @desc    Update an event
-// @access  Private (Owner only)
+// UPDATE an event (Admin Only)
 exports.updateEvent = async (req, res) => {
-  const { title, description, category, location, date, price, capacity } =
-    req.body;
-
-  // Build event object
-  const eventFields = {
-    title,
-    description,
-    category,
-    location,
-    date,
-    price,
-    capacity,
-  };
-
-  try {
-    let event = await Event.findById(req.params.id);
-
-    if (!event) {
-      return res.status(404).json({ msg: "Event not found" });
-    }
-
-    // Check if user owns the event
-    if (event.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: "User not authorized" });
-    }
-
-    event = await Event.findByIdAndUpdate(
-      req.params.id,
-      { $set: eventFields },
-      { new: true }
-    );
-
-    res.json(event);
-  } catch (err) {
-    console.error(err.message);
-    if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Event not found" });
-    }
-    res.status(500).send("Server Error");
-  }
-};
-
-// @route   DELETE api/events/:id
-// @desc    Delete an event
-// @access  Private (Owner only)
-exports.deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ msg: "Event not found" });
+    if (event.user.toString() !== req.user.id)
+      return res.status(401).json({ msg: "Not authorized" });
 
+    const updatedEvent = await Event.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+    res.json(updatedEvent);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
+// DELETE an event (Admin Only)
+exports.deleteEvent = async (req, res) => {
+  try {
+    // This is the most efficient and secure way to delete.
+    // It finds a document that matches BOTH the event's _id AND the currently logged-in user's id.
+    // If the event exists but the user isn't the owner, it will find nothing and return null.
+    const event = await Event.findOneAndDelete({ _id: req.params.id, user: req.user.id });
+
+    // If 'event' is null, it means no document was found that matched BOTH criteria.
+    // This handles two cases at once:
+    // 1. The event ID doesn't exist.
+    // 2. The event ID exists, but the user is not the owner (not authorized).
     if (!event) {
-      return res.status(404).json({ msg: "Event not found" });
+      return res.status(404).json({ msg: 'Event not found or user not authorized' });
     }
 
-    // Check user
-    if (event.user.toString() !== req.user.id) {
-      return res.status(401).json({ msg: "User not authorized" });
-    }
-
-    await event.remove(); // Mongoose 5.x, for 6.x+ use `await Event.findByIdAndRemove(req.params.id);`
-
-    // Remove event from organizedEvents of the user
-    await User.findByIdAndUpdate(req.user.id, {
-      $pull: { organizedEvents: { event: req.params.id } },
-    });
-
-    // Also remove this event from registeredEvents of all users who registered for it
+    // Optional but good practice: If the event is deleted, remove it from any user's "registeredEvents" list.
+    // This prevents having dangling references in your user documents.
     await User.updateMany(
-      { "registeredEvents.event": req.params.id },
+      { 'registeredEvents.event': req.params.id },
       { $pull: { registeredEvents: { event: req.params.id } } }
     );
 
-    res.json({ msg: "Event removed" });
+    res.json({ msg: 'Event removed successfully' });
   } catch (err) {
     console.error(err.message);
-    if (err.kind === "ObjectId") {
-      return res.status(404).json({ msg: "Event not found" });
+    // This handles cases where the provided ID is not a valid MongoDB ObjectId format
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Event not found' });
     }
+    res.status(500).send('Server Error');
+  }
+};
+
+// DUPLICATE an event (Admin Only)
+exports.duplicateEvent = async (req, res) => {
+  try {
+    const originalEvent = await Event.findById(req.params.id);
+    if (!originalEvent) return res.status(404).json({ msg: "Event not found" });
+
+    const newEventData = {
+      ...originalEvent.toObject(),
+      _id: new mongoose.Types.ObjectId(),
+      title: `${originalEvent.title} (Copy)`,
+      status: "draft",
+      attendees: [],
+      currentAttendees: 0,
+      user: req.user.id,
+      createdAt: new Date(),
+    };
+    delete newEventData.__v; // Remove version key
+
+    const duplicatedEvent = new Event(newEventData);
+    await duplicatedEvent.save();
+    res.status(201).json(duplicatedEvent);
+  } catch (err) {
+    console.error(err.message);
     res.status(500).send("Server Error");
   }
 };

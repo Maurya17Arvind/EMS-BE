@@ -1,0 +1,219 @@
+{
+  "info": {
+    "name": "EMS API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "API endpoints for EMS backend."
+  },
+  "item": [
+    {
+      "name": "Attendees (Admin Only)",
+      "item": [
+        {
+          "name": "Get All Attendees",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/api/attendees", "host": ["{{baseUrl}}"], "path": ["api", "attendees"]}
+          }
+        },
+        {
+          "name": "Create Attendee",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/attendees", "host": ["{{baseUrl}}"], "path": ["api", "attendees"]},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"event\": \"\",\n  \"company\": \"\",\n  \"status\": \"registered\",\n  \"ticketType\": \"standard\"\n}"}
+          }
+        },
+        {
+          "name": "Update Attendee",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/attendees/:id", "host": ["{{baseUrl}}"], "path": ["api", "attendees", ":id"]},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"event\": \"\",\n  \"company\": \"\",\n  \"status\": \"registered\",\n  \"ticketType\": \"standard\"\n}"}
+          }
+        },
+        {
+          "name": "Delete Attendee",
+          "request": {
+            "method": "DELETE",
+            "url": {"raw": "{{baseUrl}}/api/attendees/:id", "host": ["{{baseUrl}}"], "path": ["api", "attendees", ":id"]}
+          }
+        },
+        {
+          "name": "Check-in Attendee",
+          "request": {
+            "method": "PATCH",
+            "url": {"raw": "{{baseUrl}}/api/attendees/:id/checkin", "host": ["{{baseUrl}}"], "path": ["api", "attendees", ":id", "checkin"]}
+          }
+        },
+        {
+          "name": "Bulk Delete Attendees",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/attendees/bulk-delete", "host": ["{{baseUrl}}"], "path": ["api", "attendees", "bulk-delete"]},
+            "body": {"mode": "raw", "raw": "{\n  \"ids\": [\"id1\", \"id2\"]\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard (Admin Only)",
+      "item": [
+        {
+          "name": "Get Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/api/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["api", "dashboard", "stats"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Signup",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/auth/signup", "host": ["{{baseUrl}}"], "path": ["api", "auth", "signup"]},
+            "body": {"mode": "raw", "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"\",\n  \"password\": \"\"\n}"}
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"]},
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}"}
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/auth/forgot-password", "host": ["{{baseUrl}}"], "path": ["api", "auth", "forgot-password"]},
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"\"\n}"}
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "PATCH",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/auth/reset-password/:token", "host": ["{{baseUrl}}"], "path": ["api", "auth", "reset-password", ":token"]},
+            "body": {"mode": "raw", "raw": "{\n  \"password\": \"\",\n  \"confirmPassword\": \"\"\n}"}
+          }
+        },
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/auth/admin/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "admin", "login"]},
+            "body": {"mode": "raw", "raw": "{\n  \"email\": \"\",\n  \"password\": \"\"\n}"}
+          }
+        },
+        {
+          "name": "Create Admin",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/auth/admin/create", "host": ["{{baseUrl}}"], "path": ["api", "auth", "admin", "create"]},
+            "body": {"mode": "raw", "raw": "{\n  \"firstName\": \"\",\n  \"lastName\": \"\",\n  \"email\": \"\",\n  \"password\": \"\"\n}"}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/api/events", "host": ["{{baseUrl}}"], "path": ["api", "events"]}
+          }
+        },
+        {
+          "name": "Get Event By ID",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/api/events/:id", "host": ["{{baseUrl}}"], "path": ["api", "events", ":id"]}
+          }
+        },
+        {
+          "name": "Register for Event",
+          "request": {
+            "method": "POST",
+            "url": {"raw": "{{baseUrl}}/api/events/:id/register", "host": ["{{baseUrl}}"], "path": ["api", "events", ":id", "register"]}
+          }
+        },
+        {
+          "name": "Unregister from Event",
+          "request": {
+            "method": "POST",
+            "url": {"raw": "{{baseUrl}}/api/events/:id/unregister", "host": ["{{baseUrl}}"], "path": ["api", "events", ":id", "unregister"]}
+          }
+        },
+        {
+          "name": "Create Event (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/events", "host": ["{{baseUrl}}"], "path": ["api", "events"]},
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"\",\n  \"description\": \"\",\n  \"date\": \"\",\n  \"location\": \"\",\n  \"category\": \"\",\n  \"status\": \"published\"\n}"}
+          }
+        },
+        {
+          "name": "Update Event (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/events/:id", "host": ["{{baseUrl}}"], "path": ["api", "events", ":id"]},
+            "body": {"mode": "raw", "raw": "{\n  \"title\": \"\",\n  \"description\": \"\",\n  \"date\": \"\",\n  \"location\": \"\",\n  \"category\": \"\",\n  \"status\": \"published\"\n}"}
+          }
+        },
+        {
+          "name": "Delete Event (Admin)",
+          "request": {
+            "method": "DELETE",
+            "url": {"raw": "{{baseUrl}}/api/events/:id", "host": ["{{baseUrl}}"], "path": ["api", "events", ":id"]}
+          }
+        },
+        {
+          "name": "Duplicate Event (Admin)",
+          "request": {
+            "method": "POST",
+            "url": {"raw": "{{baseUrl}}/api/events/:id/duplicate", "host": ["{{baseUrl}}"], "path": ["api", "events", ":id", "duplicate"]}
+          }
+        }
+      ]
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "url": {"raw": "{{baseUrl}}/api/profile/me", "host": ["{{baseUrl}}"], "path": ["api", "profile", "me"]}
+          }
+        },
+        {
+          "name": "Update My Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "url": {"raw": "{{baseUrl}}/api/profile/me", "host": ["{{baseUrl}}"], "path": ["api", "profile", "me"]},
+            "body": {"mode": "raw", "raw": "{\n  \"name\": \"\",\n  \"email\": \"\"\n}"}
+          }
+        }
+      ]
+    }
+  ]
+}
