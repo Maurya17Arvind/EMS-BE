@@ -5,9 +5,14 @@ require("dotenv").config();
 const cors = require("cors");
 
 const app = express();
+const allowedOrigins = [
+  "http://localhost:8081", // Your local frontend
+  "http://localhost:8080", // Your deployed production site
+  "https://your-staging-app.com", // Your staging/testing site
+];
 app.use(
   cors({
-    origin: process.env.CLIENT_URL || "http://localhost:8080",
+    origin: allowedOrigins,
     credentials: true,
   })
 );
